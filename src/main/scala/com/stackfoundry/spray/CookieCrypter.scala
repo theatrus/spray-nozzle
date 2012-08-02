@@ -4,17 +4,15 @@ import javax.crypto.spec.SecretKeySpec
 import javax.crypto.{Cipher, Mac}
 import sun.misc.{BASE64Decoder, BASE64Encoder}
 
-object CookieCrypter {
-  private[this] val hmacKeySpec = new SecretKeySpec(
-    "qnscAdgRlkIhAdPY44oiexBKtQbGY0orf7OV1I50".getBytes(),
-    "HmacSHA1")
+/**
+ * A basic class to handle cookie encryption and verification, with time expiration
+ * as required.
+ */
 
-  private[this] val rc4KeySpec = new SecretKeySpec(
-    "qnscAdgRlkIhAUPY4qoiexBKtQbGY0orf7OV1I50".getBytes(),
-    "RC4"
-  )
 
-  val allowTimeSkew = 60*60*24*5 // 5 days
+
+class CookieCrypter(hmacKeySpec: SecretKeySpec, cipherKeySpec: SecretKeySpec, defaultExpires: Long = 60*60*24*5) {
+
 
   def verify(inp: String, extra: String = "") : Option[String] = {
     val decoder = new BASE64Decoder()
@@ -23,7 +21,7 @@ object CookieCrypter {
 
     val decoded = decoder.decodeBuffer(inp)
     val cipher = Cipher.getInstance("RC4")
-    cipher.init(Cipher.DECRYPT_MODE, rc4KeySpec)
+    cipher.init(Cipher.DECRYPT_MODE, cipherKeySpec)
     val clear = cipher.doFinal(decoded)
 
     val (rest, msg_time_bytes) = clear.splitAt(clear.size - 4)
@@ -35,19 +33,19 @@ object CookieCrypter {
     val computed_hmac = mac.doFinal(message ++ extra.getBytes("UTF-8"))
     if (!computed_hmac.equals(hmac))
       None
-    else if (msg_time + allowTimeSkew < now)
+    else if (msg_time < now)
       None
     else
       Some(new String(message, "UTF-8"))
 
   }
 
-  def output(inp: String, extra: String = "") : String = {
+  def output(inp: String, extra: String = "", expires: Long = defaultExpires) : String = {
 
     val encoder = new BASE64Encoder()
 
     // First append the time to the message
-    val now = System.currentTimeMillis() / 1000
+    val now = expires + (System.currentTimeMillis() / 1000)
     val now_bytes = List(now >> 24, now >> 16, now >> 8, now).map(_.toByte).toArray
     val in_bytes = inp.getBytes("UTF-8") ++ now_bytes
 
