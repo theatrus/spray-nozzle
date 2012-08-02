@@ -1,4 +1,4 @@
-package com.stackfoundry.spray
+package com.stackfoundry.spray-nozzle
 
 import cc.spray.{Reject, Directives, Pass}
 

@@ -1,4 +1,4 @@
-package com.stackfoundry.spray
+package com.stackfoundry.spray-nozzle
 
 import javax.crypto.spec.SecretKeySpec
 import javax.crypto.{Cipher, Mac}

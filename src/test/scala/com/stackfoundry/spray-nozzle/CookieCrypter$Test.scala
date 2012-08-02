@@ -1,4 +1,4 @@
-package com.stackfoundry.spray
+package com.stackfoundry.spray-nozzle
 
 import org.specs2.mutable.Specification
 import javax.crypto.spec.SecretKeySpec
