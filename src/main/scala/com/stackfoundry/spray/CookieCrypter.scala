@@ -9,10 +9,24 @@ import sun.misc.{BASE64Decoder, BASE64Encoder}
  * as required.
  */
 
+trait CookieRC4 {
+   val cipherAlgo = "RC4"
+}
+
+trait CookieSHA1 {
+   val macAlgo = "HmacSHA1"
+}
 
 
-class CookieCrypter(hmacKeySpec: SecretKeySpec, cipherKeySpec: SecretKeySpec, defaultExpires: Long = 60*60*24*5) {
+trait CookieCrypter {
 
+
+  val macAlgo : String
+  val cipherAlgo : String
+
+  protected val defaultExpires: Long = 60*60*24*5
+  protected val cipherKeySpec: SecretKeySpec
+  protected val hmacKeySpec: SecretKeySpec
 
   def verify(inp: String, extra: String = "") : Option[String] = {
     val decoder = new BASE64Decoder()
@@ -20,7 +34,7 @@ class CookieCrypter(hmacKeySpec: SecretKeySpec, cipherKeySpec: SecretKeySpec, de
 
 
     val decoded = decoder.decodeBuffer(inp)
-    val cipher = Cipher.getInstance("RC4")
+    val cipher = Cipher.getInstance(cipherAlgo)
     cipher.init(Cipher.DECRYPT_MODE, cipherKeySpec)
     val clear = cipher.doFinal(decoded)
 
@@ -28,7 +42,8 @@ class CookieCrypter(hmacKeySpec: SecretKeySpec, cipherKeySpec: SecretKeySpec, de
     val msg_time = (msg_time_bytes(0) << 24) + (msg_time_bytes(1) << 16) + (msg_time_bytes(2) << 8) + (msg_time_bytes(3))
 
 
-    val mac = Mac.getInstance("HmacSHA1")
+    val mac = Mac.getInstance(macAlgo)
+    mac.init(hmacKeySpec)
     val (hmac, message) = rest.splitAt(mac.getMacLength)
     val computed_hmac = mac.doFinal(message ++ extra.getBytes("UTF-8"))
     if (!computed_hmac.equals(hmac))
@@ -49,15 +64,15 @@ class CookieCrypter(hmacKeySpec: SecretKeySpec, cipherKeySpec: SecretKeySpec, de
     val now_bytes = List(now >> 24, now >> 16, now >> 8, now).map(_.toByte).toArray
     val in_bytes = inp.getBytes("UTF-8") ++ now_bytes
 
-    val mac = Mac.getInstance("HmacSHA1")
+    val mac = Mac.getInstance(macAlgo)
     mac.init(hmacKeySpec)
     val hmac = mac.doFinal(in_bytes ++ extra.getBytes("UTF-8"))
 
 
     val to_cipher = hmac ++ in_bytes
 
-    val cipher = Cipher.getInstance("RC4")
-    cipher.init(Cipher.ENCRYPT_MODE, rc4KeySpec)
+    val cipher = Cipher.getInstance(cipherAlgo)
+    cipher.init(Cipher.ENCRYPT_MODE, cipherKeySpec)
     val ciphered = cipher.doFinal(to_cipher)
 
     encoder.encode(ciphered)
