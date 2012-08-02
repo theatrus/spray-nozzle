@@ -4,11 +4,6 @@ import javax.crypto.spec.SecretKeySpec
 import javax.crypto.{Cipher, Mac}
 import sun.misc.{BASE64Decoder, BASE64Encoder}
 
-/**
- * A basic class to handle cookie encryption and verification, with time expiration
- * as required.
- */
-
 trait CookieRC4 {
    val cipherAlgo = "RC4"
 }
@@ -17,7 +12,11 @@ trait CookieSHA1 {
    val macAlgo = "HmacSHA1"
 }
 
-
+/**
+ * A basic class to handle cookie encryption and verification, with time expiration
+ * as required.
+ * I apologize for the imperative nature, but thats what you get for using JCE.
+ */
 trait CookieCrypter {
 
 
