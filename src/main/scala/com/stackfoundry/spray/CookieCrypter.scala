@@ -31,21 +31,20 @@ trait CookieCrypter {
     val decoder = new BASE64Decoder()
     val now = System.currentTimeMillis() / 1000
 
-
     val decoded = decoder.decodeBuffer(inp)
     val cipher = Cipher.getInstance(cipherAlgo)
     cipher.init(Cipher.DECRYPT_MODE, cipherKeySpec)
     val clear = cipher.doFinal(decoded)
 
     val (rest, msg_time_bytes) = clear.splitAt(clear.size - 4)
-    val msg_time = (msg_time_bytes(0) << 24) + (msg_time_bytes(1) << 16) + (msg_time_bytes(2) << 8) + (msg_time_bytes(3))
-
+    val msg_time = ((msg_time_bytes(0) << 24) & 0xFF000000) | ((msg_time_bytes(1) << 16) & 0xFF0000) | ((msg_time_bytes(2) << 8) & 0xFF00) | (msg_time_bytes(3) & 0xFF)
 
     val mac = Mac.getInstance(macAlgo)
     mac.init(hmacKeySpec)
     val (hmac, message) = rest.splitAt(mac.getMacLength)
-    val computed_hmac = mac.doFinal(message ++ extra.getBytes("UTF-8"))
-    if (!computed_hmac.equals(hmac))
+    val computed_hmac = mac.doFinal(message ++ msg_time_bytes ++ extra.getBytes("UTF-8"))
+
+    if (!computed_hmac.sameElements(hmac))
       None
     else if (msg_time < now)
       None
@@ -60,16 +59,14 @@ trait CookieCrypter {
 
     // First append the time to the message
     val now = expires + (System.currentTimeMillis() / 1000)
-    val now_bytes = List(now >> 24, now >> 16, now >> 8, now).map(_.toByte).toArray
+    val now_bytes = List((now >> 24) & 0xFF, (now >> 16) & 0xFF, (now >> 8) & 0xFF, now & 0xFF).map(_.toByte).toArray
     val in_bytes = inp.getBytes("UTF-8") ++ now_bytes
 
     val mac = Mac.getInstance(macAlgo)
     mac.init(hmacKeySpec)
     val hmac = mac.doFinal(in_bytes ++ extra.getBytes("UTF-8"))
 
-
     val to_cipher = hmac ++ in_bytes
-
     val cipher = Cipher.getInstance(cipherAlgo)
     cipher.init(Cipher.ENCRYPT_MODE, cipherKeySpec)
     val ciphered = cipher.doFinal(to_cipher)

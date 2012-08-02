@@ -22,7 +22,7 @@ class CookieCrypter$Test extends Specification {
     }
     t must not beNull
   }
-  "Simple verification should" should {
+  "Simple verification" should {
     val t = new CookieCrypter with CookieSHA1 with CookieRC4 {
       protected val hmacKeySpec: SecretKeySpec = DemoKeys.hmacKeySpec
       protected val cipherKeySpec: SecretKeySpec = DemoKeys.rc4KeySpec
@@ -32,6 +32,12 @@ class CookieCrypter$Test extends Specification {
     }
     "internally verify" in {
       t.verify(t.output("Hello")) === Some("Hello")
+    }
+    "support extra" in {
+      t.verify(t.output("Hello", extra = "MAGIC"), extra = "MAGIC") === Some("Hello")
+    }
+    "expire" in {
+      t.verify(t.output("Hello", expires = -1)) === None
     }
   }
 
