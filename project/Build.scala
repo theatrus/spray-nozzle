@@ -4,7 +4,7 @@ import Keys._
 object Build extends sbt.Build {
   import Dependencies._
 
-  lazy val myProject = Project("spray-nozzle", file("."))
+  lazy val myProject = Project("spray_nozzle", file("."))
     .settings(
       organization  := "com.stackfoundry",
       version       := "0.1",

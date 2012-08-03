@@ -1,13 +1,9 @@
-package com.stackfoundry.spray-nozzle
+package com.stackfoundry.spray_nozzle
 
-import javax.crypto.spec.SecretKeySpec
+import javax.crypto.spec.{IvParameterSpec, SecretKeySpec}
 import javax.crypto.{Cipher, Mac}
 import sun.misc.{BASE64Decoder, BASE64Encoder}
 
-trait CookieRC4 {
-	val cipherAlgo = "RC4"
-	val keyType = "RC4"
-}
 
 trait CookieSHA1 {
 	val macAlgo = "HmacSHA1"
@@ -20,6 +16,11 @@ trait CookieMD5 {
 trait CookieAES {
 	val cipherAlgo = "AES/CBC/PKCS5Padding"
 	val keyType = "AES"
+}
+
+trait CookieBlowfish {
+	val cipherAlgo = "Blowfish/CBC/PKCS5Padding"
+	val keyType = "Blowfish"
 }
 
 /**
@@ -46,10 +47,13 @@ trait CookieCrypter {
 		val decoder = new BASE64Decoder()
 		val now = System.currentTimeMillis() / 1000
 
-		val decoded = decoder.decodeBuffer(inp)
 		val cipher = Cipher.getInstance(cipherAlgo)
-		cipher.init(Cipher.DECRYPT_MODE, cipherKeySpec)
-		val clear = cipher.doFinal(decoded)
+
+		val decoded = decoder.decodeBuffer(inp)
+		val (iv, ciphertext) = decoded.splitAt(cipher.getBlockSize)
+
+		cipher.init(Cipher.DECRYPT_MODE, cipherKeySpec, new IvParameterSpec(iv))
+		val clear = cipher.doFinal(ciphertext)
 
 		val (rest, msg_time_bytes) = clear.splitAt(clear.size - 4)
 		val msg_time = ((msg_time_bytes(0) << 24) & 0xFF000000) | ((msg_time_bytes(1) << 16) & 0xFF0000) | ((msg_time_bytes(2) << 8) & 0xFF00) | (msg_time_bytes(3) & 0xFF)
@@ -83,9 +87,15 @@ trait CookieCrypter {
 
 		val to_cipher = hmac ++ in_bytes
 		val cipher = Cipher.getInstance(cipherAlgo)
-		cipher.init(Cipher.ENCRYPT_MODE, cipherKeySpec)
+
+		// Generate a random IV
+		val iv = Array.fill(cipher.getBlockSize){0.toByte}
+		new java.security.SecureRandom().nextBytes(iv)
+		val ivspec = new IvParameterSpec(iv)
+
+		cipher.init(Cipher.ENCRYPT_MODE, cipherKeySpec, ivspec)
 		val ciphered = cipher.doFinal(to_cipher)
 
-		encoder.encode(ciphered)
+		encoder.encode(iv ++ ciphered)
 	}
 }
