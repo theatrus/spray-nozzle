@@ -11,3 +11,12 @@ Warning: Very experimental right now
 * Header checking spray routes
 * Authentication and CSRF prevention spray routes (coming soon)
 
+### Versions ###
+
+Works with Spray 1.0-M2. Will be updated to move along the 1.0 tree as releases are made.
+
+## Using ##
+
+Include the following dependency in your `build.sbt`:
+
+    "com.stackfoundry" % "spray-nozzle" % "0.1-SNAPSHOT"
