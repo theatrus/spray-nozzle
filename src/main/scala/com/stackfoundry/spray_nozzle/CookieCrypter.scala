@@ -13,6 +13,10 @@ trait CookieMD5 {
 	val macAlgo = "HmacMD5"
 }
 
+trait CookieSHA256 {
+	val macAlgo = "HmacSHA256"
+}
+
 trait CookieAES {
 	val cipherAlgo = "AES/CBC/PKCS5Padding"
 	val keyType = "AES"

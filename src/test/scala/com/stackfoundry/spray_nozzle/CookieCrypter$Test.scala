@@ -38,7 +38,7 @@ class CookieCrypter$Test extends Specification {
       t.verify(t.output("Hello", expires = -1)) === None
     }
   }
-  "Other algorithms ->" should {
+  "Other algorithms" should {
     "AES/MD5" in {
       val t = new CookieCrypter with CookieMD5 with CookieAES {
         protected val hmacKey = DemoKeys.hmacKeySpec
@@ -59,6 +59,13 @@ class CookieCrypter$Test extends Specification {
 				protected val cipherKey = DemoKeys.one28key
 			}
 			t.verify(t.output("I like sushi")) === Some("I like sushi")
+		}
+		"SHA256" in {
+			val t = new CookieCrypter with CookieSHA256 with CookieAES {
+				protected val hmacKey = DemoKeys.hmacKeySpec
+				protected val cipherKey = DemoKeys.one28key
+			}
+			t.verify(t.output("More sha")) === Some("More sha")
 		}
 	}
 	"Multiple usages" should {
