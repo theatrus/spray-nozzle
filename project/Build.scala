@@ -6,7 +6,7 @@ object Build extends sbt.Build {
 
 	lazy val myProject = Project("spray-nozzle", file("."))
 		.settings(
-		organization  := "com.stackfoundry",
+		organization  := "us.theatr",
 		version       := "0.1-SNAPSHOT",
 		scalaVersion  := "2.9.1",
 		crossScalaVersions := Seq("2.9.1", "2.9.2"),

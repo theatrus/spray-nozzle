@@ -1,13 +1,6 @@
-package com.stackfoundry.spray_nozzle
+package us.theatr.spray.nozzle
 
 import org.specs2.mutable.Specification
-import javax.crypto.spec.SecretKeySpec
-
-object DemoKeys {
-  val hmacKeySpec = "qnscAdgRlkIhAdPY44oiexBKtQbGY0orf7OV1I50".getBytes()
-  val one28key = "abcdefghimnoalqi".getBytes()
-	val two56key = { val a = Array.fill(32){0.toByte}; new java.security.SecureRandom(a); a }
-}
 
 class CookieCrypter$Test extends Specification {
 
@@ -84,5 +77,15 @@ class CookieCrypter$Test extends Specification {
 			}
 			t.verify(last) === Some(lastString)
 		}
+	}
+}
+
+object DemoKeys {
+	val hmacKeySpec = "qnscAdgRlkIhAdPY44oiexBKtQbGY0orf7OV1I50".getBytes()
+	val one28key = "abcdefghimnoalqi".getBytes()
+	val two56key = {
+		val a = Array.fill(32) {
+			0.toByte
+		}; new java.security.SecureRandom(a); a
 	}
 }

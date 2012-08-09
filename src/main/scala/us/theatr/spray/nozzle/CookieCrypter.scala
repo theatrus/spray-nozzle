@@ -1,31 +1,8 @@
-package com.stackfoundry.spray_nozzle
+package us.theatr.spray.nozzle
 
 import javax.crypto.spec.{IvParameterSpec, SecretKeySpec}
-import javax.crypto.{Cipher, Mac}
-import sun.misc.{BASE64Decoder, BASE64Encoder}
-
-
-trait CookieSHA1 {
-	val macAlgo = "HmacSHA1"
-}
-
-trait CookieMD5 {
-	val macAlgo = "HmacMD5"
-}
-
-trait CookieSHA256 {
-	val macAlgo = "HmacSHA256"
-}
-
-trait CookieAES {
-	val cipherAlgo = "AES/CBC/PKCS5Padding"
-	val keyType = "AES"
-}
-
-trait CookieBlowfish {
-	val cipherAlgo = "Blowfish/CBC/PKCS5Padding"
-	val keyType = "Blowfish"
-}
+import sun.misc.{BASE64Encoder, BASE64Decoder}
+import javax.crypto.{Mac, Cipher}
 
 /**
  * A basic class to handle cookie encryption and verification, with time expiration
@@ -102,4 +79,26 @@ trait CookieCrypter {
 
 		encoder.encode(iv ++ ciphered)
 	}
+}
+
+trait CookieSHA1 {
+	val macAlgo = "HmacSHA1"
+}
+
+trait CookieAES {
+	val cipherAlgo = "AES/CBC/PKCS5Padding"
+	val keyType = "AES"
+}
+
+trait CookieBlowfish {
+	val cipherAlgo = "Blowfish/CBC/PKCS5Padding"
+	val keyType = "Blowfish"
+}
+
+trait CookieMD5 {
+	val macAlgo = "HmacMD5"
+}
+
+trait CookieSHA256 {
+	val macAlgo = "HmacSHA256"
 }
