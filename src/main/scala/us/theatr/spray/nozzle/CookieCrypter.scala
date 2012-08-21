@@ -1,5 +1,21 @@
 package us.theatr.spray.nozzle
 
+/*
+Copyright 2012 Yann Ramin
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 import javax.crypto.spec.{IvParameterSpec, SecretKeySpec}
 import sun.misc.{BASE64Encoder, BASE64Decoder}
 import javax.crypto.{Mac, Cipher}
@@ -24,6 +40,12 @@ trait CookieCrypter {
 	protected lazy val cipherKeySpec = new SecretKeySpec(cipherKey, keyType)
 	protected lazy val hmacKeySpec = new SecretKeySpec(hmacKey, macAlgo)
 
+	/**
+	 * Verify an input String (base64 encoded)
+	 * @param inp Input string
+	 * @param extra Any extra information to add to the verification (host name, browser, etc)
+	 * @return
+	 */
 	def verify(inp: String, extra: String = "") : Option[String] = {
 		val decoder = new BASE64Decoder()
 		val now = System.currentTimeMillis() / 1000
@@ -37,6 +59,7 @@ trait CookieCrypter {
 		val clear = cipher.doFinal(ciphertext)
 
 		val (rest, msg_time_bytes) = clear.splitAt(clear.size - 4)
+		// Unpack msgtime from its by array
 		val msg_time = ((msg_time_bytes(0) << 24) & 0xFF000000) | ((msg_time_bytes(1) << 16) & 0xFF0000) | ((msg_time_bytes(2) << 8) & 0xFF00) | (msg_time_bytes(3) & 0xFF)
 
 		val mac = Mac.getInstance(macAlgo)
@@ -53,6 +76,16 @@ trait CookieCrypter {
 
 	}
 
+	/**
+	 * Generate a signed and encrypted output file, which has a specified time to live given in milliseconds
+	 * @param inp Raw input string to sign and encrypt. This will be converted to UTF-8 before either operation.
+	 * @param extra Extra information to include in the signature but NOT in the output data -
+	 *              this same (exact) information must be provided to the verify function. For instance,
+	 *              the browser client string can be used to obfuscate non-SSL cookie-snooping attacks.
+	 * @param expires Expire after this number of milliseconds. Intervals of less than 1 second are not supported.
+	 * @return A base64 encoded string containing the encrypted and signed input string to be given to the client
+	 *         and verified with the verify function.
+	 */
 	def output(inp: String, extra: String = "", expires: Long = defaultExpires) : String = {
 
 		val encoder = new BASE64Encoder()

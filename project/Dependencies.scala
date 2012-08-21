@@ -21,5 +21,7 @@ object Dependencies {
   val sprayServer = "cc.spray"          %  "spray-server"    % V.spray
   val specs2      = "org.specs2"        %% "specs2"          % "1.11"
 	val akkaActor   = "com.typesafe.akka" % "akka-actor"       % V.akka
+	val bcprov      = "org.bouncycastle"  % "bcprov-jdk16"     % "1.46"
+
 
 }
