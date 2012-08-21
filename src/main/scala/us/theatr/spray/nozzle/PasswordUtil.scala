@@ -19,10 +19,9 @@ limitations under the License.
 import sun.misc.{BASE64Encoder, BASE64Decoder}
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
-import java.security.{Security, SecureRandom}
-import org.bouncycastle.jce.provider.BouncyCastleProvider
-
+import java.security.SecureRandom
 /**
+ *
  * A standard/boring way to store passwords safely using PBKDF#2
  * and a random salt. All parameters are encoded into the salt text string
  * to allow porting of the default algorithms and iterations at a later date.
