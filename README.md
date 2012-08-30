@@ -17,6 +17,11 @@ Works with Spray 1.0-M2. Will be updated to move along the 1.0 tree as releases 
 
 ## Using ##
 
+Include the following repository to you Ivy/Maven/SBT file:
+
+    http://repo.theatr.us
+
+
 Include the following dependency in your `build.sbt`:
 
     "com.stackfoundry" % "spray-nozzle" % "0.1-SNAPSHOT"
