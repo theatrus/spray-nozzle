@@ -27,7 +27,6 @@ import javax.crypto.{Mac, Cipher}
  */
 trait CookieCrypter {
 
-
 	val macAlgo : String
 	val cipherAlgo : String
 	val keyType : String
